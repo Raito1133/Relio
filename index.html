@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Remindly</title>
+<title>Relio</title>
 <script src="https://cdn.jsdelivr.net/npm/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <style>
 :root{--bg:#06030c;--card:#0f0919;--card2:#171028;--line:#1f1536;--text:#efeaf9;--mute:#8d82a8;--pri:#6d3fd9;--pri2:#9272e6;--ok:#34d399;--warn:#fbbf24;--pri3:#3d1f8f;--on:#fff;--cs:dark;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -25,7 +26,7 @@ input:focus,textarea:focus{border-color:var(--pri)}input[type=date],input[type=t
 .eye{position:absolute;right:26px;top:7px;width:34px;height:34px;display:grid;place-items:center;background:none;border:0;color:var(--mute);cursor:pointer}.f .eye svg{position:static;width:18px;height:18px}
 .hint{font-size:12px;color:var(--mute);margin:-6px 0 12px 4px;text-align:left}
 .row{display:flex;gap:10px}.row>*{flex:1;min-width:0}
-.btn{width:100%;background:var(--pri);color:var(--on);border:0;border-radius:14px;padding:14px;font-size:16px;font-weight:600;cursor:pointer;transition:.2s}.btn:active{transform:scale(.97)}
+.btn{width:100%;background:var(--pri);color:var(--on);border:0;border-radius:14px;padding:14px;font-size:16px;font-weight:600;cursor:pointer;transition:.2s}.btn:active{transform:scale(.97)}.btn:disabled{opacity:.6}
 .link{color:var(--pri2);background:none;border:0;font-size:14px;margin-top:16px;text-align:center;width:100%;cursor:pointer}
 .err{color:#f87171;font-size:13px;min-height:18px;margin-bottom:8px}
 .main{flex:1;overflow-y:auto;padding:22px 18px 96px}.main>h2{font-size:22px;margin-bottom:16px}.c{text-align:center;padding-top:40px}
@@ -73,7 +74,6 @@ label.l{display:block;font-size:12px;color:var(--mute);margin:0 0 6px 4px}
 .terms-copy{color:var(--mute);font-size:13px;line-height:1.6;text-align:left}
 .terms-copy h4{color:var(--text);margin:14px 0 4px;font-size:14px}
 .loading-wrap{margin:auto;text-align:center;padding:30px}.spinner{width:42px;height:42px;border:4px solid var(--line);border-top-color:var(--pri2);border-radius:50%;margin:0 auto 18px;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
-.demo-code{background:var(--card2);border:1px dashed var(--pri2);border-radius:12px;padding:12px;margin:12px 0;color:var(--pri2);font-weight:700;letter-spacing:4px;font-size:20px}
 .role-badge{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--badge-border,#6d3fd9);background:var(--badge-bg,#241744);color:var(--badge-color,#c4b5fd);border-radius:999px;padding:5px 10px;font-size:11px;font-weight:700;vertical-align:middle;margin-top:7px}
 .role-badge svg{width:13px;height:13px;stroke-width:2.4}.admin-panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin:12px 0;text-align:left}.admin-panel h3{font-size:15px;margin-bottom:10px}.admin-panel input,.admin-panel select{margin:0 0 8px}.admin-panel .btn{font-size:13px;padding:11px}.mini-btn{border:1px solid var(--line);background:var(--card2);color:var(--text);padding:7px 9px;border-radius:9px;font-size:11px;cursor:pointer}.user-row{padding:12px 0;border-bottom:1px solid var(--line);display:flex;gap:9px;align-items:center;flex-wrap:wrap}.user-row:last-child{border:0}.user-row .user-meta{flex:1;min-width:130px}.user-row .user-meta b{font-size:13px;display:block}.user-row .user-meta small{color:var(--mute);font-size:11px}.role-editor{display:grid;grid-template-columns:1fr 1fr;gap:8px}.role-editor input{margin:0}.role-chip{display:flex;align-items:center;gap:7px;background:var(--card2);border-radius:12px;padding:9px;margin:6px 0;font-size:12px}.role-chip svg{width:16px;height:16px}.role-chip span{flex:1}
 
@@ -90,7 +90,7 @@ select{width:100%;background:var(--card);border:1px solid var(--line);border-rad
 <body>
 
 <section class="screen auth on" id="auth">
-  <img class="brand" alt="Remindly" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImJnIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzhiNWNmNiIvPgogICAgICA8c3RvcCBvZmZzZXQ9Ii41NSIgc3RvcC1jb2xvcj0iIzViMmZjNCIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMyNTA5NWUiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgICA8cmFkaWFsR3JhZGllbnQgaWQ9ImhsIiBjeD0iLjIyIiBjeT0iLjEyIiByPSIuODUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiNmZmYiIHN0b3Atb3BhY2l0eT0iLjI1Ii8+CiAgICAgIDxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI2ZmZiIgc3RvcC1vcGFjaXR5PSIwIi8+CiAgICA8L3JhZGlhbEdyYWRpZW50PgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJyZyIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiIHgxPSIwIiB5MT0iMTEwIiB4Mj0iMCIgeTI9IjQxMCI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI2ZmZiIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNkNmM4ZmYiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImhkIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI2E3OGJmYSIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM2ZDNmZDkiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9Im10IiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMCI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzk0YTNiOCIvPgogICAgICA8c3RvcCBvZmZzZXQ9Ii41IiBzdG9wLWNvbG9yPSIjZjFmNWY5Ii8+CiAgICAgIDxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzk0YTNiOCIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICAgIDxmaWx0ZXIgaWQ9InNoIiB4PSItMjUlIiB5PSItMjUlIiB3aWR0aD0iMTUwJSIgaGVpZ2h0PSIxNjAlIj4KICAgICAgPGZlRHJvcFNoYWRvdyBkeD0iMCIgZHk9IjkiIHN0ZERldmlhdGlvbj0iOCIgZmxvb2QtY29sb3I9IiMxMjAzMmUiIGZsb29kLW9wYWNpdHk9Ii41Ii8+CiAgICA8L2ZpbHRlcj4KICA8L2RlZnM+CgogIDxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iMTIwIiBmaWxsPSJ1cmwoI2JnKSIvPgogIDxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iMTIwIiBmaWxsPSJ1cmwoI2hsKSIvPgogIDxyZWN0IHg9IjMiIHk9IjMiIHdpZHRoPSI1MDYiIGhlaWdodD0iNTA2IiByeD0iMTE3IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS1vcGFjaXR5PSIuMTIiIHN0cm9rZS13aWR0aD0iMyIvPgoKICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgtMTQgMCkiPgogICAgPCEtLSBSOiBzdGVtICsgY2xvY2sgYm93bCArIGxlZyAtLT4KICAgIDxnIGZpbGw9Im5vbmUiIHN0cm9rZT0idXJsKCNyZykiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsdGVyPSJ1cmwoI3NoKSI+CiAgICAgIDxwYXRoIGQ9Ik0xMzIgMTI0VjM4OCIgc3Ryb2tlLXdpZHRoPSI0OCIvPgogICAgICA8Y2lyY2xlIGN4PSIyMjIiIGN5PSIxOTQiIHI9IjY2IiBzdHJva2Utd2lkdGg9IjQyIi8+CiAgICAgIDxwYXRoIGQ9Ik0yMTIgMjY4TDI4NCAzODYiIHN0cm9rZS13aWR0aD0iNDYiLz4KICAgIDwvZz4KICAgIDwhLS0gY2xvY2sgaGFuZHMgaW4gdGhlIGJvd2wgLS0+CiAgICA8cGF0aCBkPSJNMjIyIDE5NFYxNjRNMjIyIDE5NEwyNDIgMjA2IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMTEiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgogICAgPGNpcmNsZSBjeD0iMjIyIiBjeT0iMTk0IiByPSI3IiBmaWxsPSIjZmZmIi8+CgogICAgPCEtLSBjYWxlbmRhciAtLT4KICAgIDxnIGZpbHRlcj0idXJsKCNzaCkiPgogICAgICA8cmVjdCB4PSIzMzQiIHk9IjExOCIgd2lkdGg9Ijk2IiBoZWlnaHQ9IjEwMCIgcng9IjIwIiBmaWxsPSIjZmZmIi8+CiAgICAgIDxwYXRoIGQ9Ik0zMzQgMTM4YTIwIDIwIDAgMCAxIDIwLTIwSDQxMGEyMCAyMCAwIDAgMSAyMCAyMFYxNDhIMzM0WiIgZmlsbD0idXJsKCNoZCkiLz4KICAgICAgPHJlY3QgeD0iMzUzIiB5PSIxNjIiIHdpZHRoPSIxNCIgaGVpZ2h0PSIxNCIgcng9IjQiIGZpbGw9IiM2ZDNmZDkiLz4KICAgICAgPHJlY3QgeD0iMzc1IiB5PSIxNjIiIHdpZHRoPSIxNCIgaGVpZ2h0PSIxNCIgcng9IjQiIGZpbGw9IiNkNmM4ZmYiLz4KICAgICAgPHJlY3QgeD0iMzk3IiB5PSIxNjIiIHdpZHRoPSIxNCIgaGVpZ2h0PSIxNCIgcng9IjQiIGZpbGw9IiNkNmM4ZmYiLz4KICAgICAgPHJlY3QgeD0iMzUzIiB5PSIxODYiIHdpZHRoPSIxNCIgaGVpZ2h0PSIxNCIgcng9IjQiIGZpbGw9IiNkNmM4ZmYiLz4KICAgICAgPHJlY3QgeD0iMzc1IiB5PSIxODYiIHdpZHRoPSIxNCIgaGVpZ2h0PSIxNCIgcng9IjQiIGZpbGw9IiNkNmM4ZmYiLz4KICAgICAgPHJlY3QgeD0iMzk3IiB5PSIxODYiIHdpZHRoPSIxNCIgaGVpZ2h0PSIxNCIgcng9IjQiIGZpbGw9IiMzNGQzOTkiLz4KICAgICAgPHBhdGggZD0iTTQwMC41MDAgMTkzbDMgMyA1LTYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSIyLjUwMCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+CiAgICAgIDxyZWN0IHg9IjM1NiIgeT0iMTA0IiB3aWR0aD0iMTIiIGhlaWdodD0iMjgiIHJ4PSI2IiBmaWxsPSIjZmZmIiBzdHJva2U9IiM0YzFkOTUiIHN0cm9rZS13aWR0aD0iMyIvPgogICAgICA8cmVjdCB4PSIzOTYiIHk9IjEwNCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjI4IiByeD0iNiIgZmlsbD0iI2ZmZiIgc3Ryb2tlPSIjNGMxZDk1IiBzdHJva2Utd2lkdGg9IjMiLz4KICAgIDwvZz4KCiAgICA8IS0tIHBlbmNpbCAtLT4KICAgIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDM4MCAzMjIpIHJvdGF0ZSg0NSkiIGZpbHRlcj0idXJsKCNzaCkiPgogICAgICA8cmVjdCB4PSItMTciIHk9Ii00MCIgd2lkdGg9IjM0IiBoZWlnaHQ9IjY4IiBmaWxsPSIjZmJiZjI0Ii8+CiAgICAgIDxyZWN0IHg9IjMiIHk9Ii00MCIgd2lkdGg9IjE0IiBoZWlnaHQ9IjY4IiBmaWxsPSIjZjU5ZTBiIi8+CiAgICAgIDxyZWN0IHg9Ii0xMiIgeT0iLTQwIiB3aWR0aD0iNSIgaGVpZ2h0PSI2OCIgZmlsbD0iI2ZkZTY4YSIgb3BhY2l0eT0iLjg1Ii8+CiAgICAgIDxyZWN0IHg9Ii0xNyIgeT0iLTU0IiB3aWR0aD0iMzQiIGhlaWdodD0iMTQiIGZpbGw9InVybCgjbXQpIi8+CiAgICAgIDxwYXRoIGQ9Ik0tMTcgLTQ4SDE3TS0xNyAtNDRIMTciIHN0cm9rZT0iIzY0NzQ4YiIgc3Ryb2tlLXdpZHRoPSIxLjUwMCIvPgogICAgICA8cmVjdCB4PSItMTciIHk9Ii03MCIgd2lkdGg9IjM0IiBoZWlnaHQ9IjE4IiByeD0iOCIgZmlsbD0iI2Y0NzJiNiIvPgogICAgICA8cGF0aCBkPSJNLTE3IDI4SDE3TDAgNThaIiBmaWxsPSIjZjFkNWE4Ii8+CiAgICAgIDxwYXRoIGQ9Ik0tNiA0N0g2TDAgNThaIiBmaWxsPSIjMmUxYTVjIi8+CiAgICA8L2c+CiAgPC9nPgo8L3N2Zz4K">
+  <img class="brand" alt="Relio">
   <h1 id="at">Welcome back</h1>
   <p class="sub" id="as">Sign in to your daily planner</p>
   <div id="sup" style="display:none">
@@ -123,9 +123,7 @@ select{width:100%;background:var(--card);border:1px solid var(--line);border-rad
     <button class="btn" id="rSend">Send Code</button>
   </div>
   <div id="r2" style="display:none">
-    <input id="rCode" inputmode="numeric" maxlength="6" placeholder="Enter 6-digit code" style="text-align:center;letter-spacing:6px;font-size:20px">
-    <div class="demo-code" id="rDemo"></div>
-    <p class="hint" style="text-align:center;margin:0 0 14px">Demo code for frontend testing only. No email is sent yet.</p>
+    <input id="rCode" inputmode="numeric" maxlength="8" placeholder="Enter 6-digit code" style="text-align:center;letter-spacing:6px;font-size:20px">
     <div class="f"><i data-lucide="lock"></i><input id="rPass" type="password" placeholder="New password" style="padding-right:44px"><button type="button" class="eye" data-t="rPass"><i data-lucide="eye"></i></button><span class="rq">*</span></div>
     <div class="hint">Minimum of 8 characters</div>
     <div class="f"><i data-lucide="shield-check"></i><input id="rPass2" type="password" placeholder="Confirm new password" style="padding-right:44px"><button type="button" class="eye" data-t="rPass2"><i data-lucide="eye"></i></button><span class="rq">*</span></div>
@@ -141,25 +139,23 @@ select{width:100%;background:var(--card);border:1px solid var(--line);border-rad
 <section class="screen auth" id="verify">
   <div class="logo"><i data-lucide="mail-check"></i></div>
   <h1>Email Verification</h1>
-  <p class="sub">Enter the 6-digit code to verify your email address.</p>
-  <input id="verifyCode" inputmode="numeric" maxlength="6" placeholder="Enter 6-digit code" style="text-align:center;letter-spacing:6px;font-size:20px">
-  <div class="demo-code" id="demoCode"></div>
-  <p class="hint" style="text-align:center;margin:0 0 14px">Demo code for frontend testing only. No email is sent yet.</p>
+  <p class="sub" id="verifySub">Enter the 6-digit code sent to your email.</p>
+  <input id="verifyCode" inputmode="numeric" maxlength="8" placeholder="Enter 6-digit code" style="text-align:center;letter-spacing:6px;font-size:20px">
   <div class="err" id="verifyErr"></div>
   <button class="btn" id="verifyBtn">Verify Email</button>
   <button class="link" id="resendCode">Resend Code</button>
-  <button class="link" id="skipVerify">Skip for Now</button>
+  <button class="link" id="verifyBack">Back to Sign in</button>
 </section>
 
 <div class="sheet" id="termsSheet"><div class="box">
-  <h3 style="margin-bottom:12px">Remindly Terms and Conditions</h3>
+  <h3 style="margin-bottom:12px">Relio Terms and Conditions</h3>
   <div class="terms-copy">
-    <p>Welcome to Remindly! By using this app, you agree to the following simple rules.</p>
-    <h4>1. Use the App Properly</h4><p>Use Remindly to create and manage your personal reminders. Do not use the app to harm others or disrupt the service.</p>
+    <p>Welcome to Relio! By using this app, you agree to the following simple rules.</p>
+    <h4>1. Use the App Properly</h4><p>Use Relio to create and manage your personal reminders. Do not use the app to harm others or disrupt the service.</p>
     <h4>2. Your Account</h4><p>Keep your password private. You are responsible for activity made using your account. Give correct information when creating an account.</p>
     <h4>3. Your Reminders and Information</h4><p>Your reminders and profile information are intended for your personal use. Do not add information that you do not have permission to use.</p>
-    <h4>4. Availability</h4><p>We will do our best to keep Remindly working, but the app may sometimes be unavailable or need updates.</p>
-    <h4>5. Changes</h4><p>These terms may be updated when the app changes. Continued use of Remindly means you accept the updated terms.</p>
+    <h4>4. Availability</h4><p>We will do our best to keep Relio working, but the app may sometimes be unavailable or need updates.</p>
+    <h4>5. Changes</h4><p>These terms may be updated when the app changes. Continued use of Relio means you accept the updated terms.</p>
     <h4>6. Agreement</h4><p>If you do not agree with these terms, please do not create an account or use the app.</p>
   </div>
   <label class="terms-agree"><input type="checkbox" id="modalTermsCheck"><span>I have read and agree to the Terms and Conditions.</span></label>
@@ -169,10 +165,10 @@ select{width:100%;background:var(--card);border:1px solid var(--line);border-rad
 </div></div>
 
 <section class="screen" id="about"><div class="main c">
-  <img class="brand" alt="Remindly" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImJnIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzhiNWNmNiIvPgogICAgICA8c3RvcCBvZmZzZXQ9Ii41NSIgc3RvcC1jb2xvcj0iIzViMmZjNCIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMyNTA5NWUiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgICA8cmFkaWFsR3JhZGllbnQgaWQ9ImhsIiBjeD0iLjIyIiBjeT0iLjEyIiByPSIuODUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiNmZmYiIHN0b3Atb3BhY2l0eT0iLjI1Ii8+CiAgICAgIDxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI2ZmZiIgc3RvcC1vcGFjaXR5PSIwIi8+CiAgICA8L3JhZGlhbEdyYWRpZW50PgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJyZyIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiIHgxPSIwIiB5MT0iMTEwIiB4Mj0iMCIgeTI9IjQxMCI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI2ZmZiIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNkNmM4ZmYiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImhkIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI2E3OGJmYSIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM2ZDNmZDkiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9Im10IiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMCI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzk0YTNiOCIvPgogICAgICA8c3RvcCBvZmZzZXQ9Ii41IiBzdG9wLWNvbG9yPSIjZjFmNWY5Ii8+CiAgICAgIDxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzk0YTNiOCIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICAgIDxmaWx0ZXIgaWQ9InNoIiB4PSItMjUlIiB5PSItMjUlIiB3aWR0aD0iMTUwJSIgaGVpZ2h0PSIxNjAlIj4KICAgICAgPGZlRHJvcFNoYWRvdyBkeD0iMCIgZHk9IjkiIHN0ZERldmlhdGlvbj0iOCIgZmxvb2QtY29sb3I9IiMxMjAzMmUiIGZsb29kLW9wYWNpdHk9Ii41Ii8+CiAgICA8L2ZpbHRlcj4KICA8L2RlZnM+CgogIDxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iMTIwIiBmaWxsPSJ1cmwoI2JnKSIvPgogIDxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiByeD0iMTIwIiBmaWxsPSJ1cmwoI2hsKSIvPgogIDxyZWN0IHg9IjMiIHk9IjMiIHdpZHRoPSI1MDYiIGhlaWdodD0iNTA2IiByeD0iMTE3IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS1vcGFjaXR5PSIuMTIiIHN0cm9rZS13aWR0aD0iMyIvPgoKICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgtMTQgMCkiPgogICAgPCEtLSBSOiBzdGVtICsgY2xvY2sgYm93bCArIGxlZyAtLT4KICAgIDxnIGZpbGw9Im5vbmUiIHN0cm9rZT0idXJsKCNyZykiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgZmlsdGVyPSJ1cmwoI3NoKSI+CiAgICAgIDxwYXRoIGQ9Ik0xMzIgMTI0VjM4OCIgc3Ryb2tlLXdpZHRoPSI0OCIvPgogICAgICA8Y2lyY2xlIGN4PSIyMjIiIGN5PSIxOTQiIHI9IjY2IiBzdHJva2Utd2lkdGg9IjQyIi8+CiAgICAgIDxwYXRoIGQ9Ik0yMTIgMjY4TDI4NCAzODYiIHN0cm9rZS13aWR0aD0iNDYiLz4KICAgIDwvZz4KICAgIDwhLS0gY2xvY2sgaGFuZHMgaW4gdGhlIGJvd2wgLS0+CiAgICA8cGF0aCBkPSJNMjIyIDE5NFYxNjRNMjIyIDE5NEwyNDIgMjA2IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMTEiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgogICAgPGNpcmNsZSBjeD0iMjIyIiBjeT0iMTk0IiByPSI3IiBmaWxsPSIjZmZmIi8+CgogICAgPCEtLSBjYWxlbmRhciAtLT4KICAgIDxnIGZpbHRlcj0idXJsKCNzaCkiPgogICAgICA8cmVjdCB4PSIzMzQiIHk9IjExOCIgd2lkdGg9Ijk2IiBoZWlnaHQ9IjEwMCIgcng9IjIwIiBmaWxsPSIjZmZmIi8+CiAgICAgIDxwYXRoIGQ9Ik0zMzQgMTM4YTIwIDIwIDAgMCAxIDIwLTIwSDQxMGEyMCAyMCAwIDAgMSAyMCAyMFYxNDhIMzM0WiIgZmlsbD0idXJsKCNoZCkiLz4KICAgICAgPHJlY3QgeD0iMzUzIiB5PSIxNjIiIHdpZHRoPSIxNCIgaGVpZ2h0PSIxNCIgcng9IjQiIGZpbGw9IiM2ZDNmZDkiLz4KICAgICAgPHJlY3QgeD0iMzc1IiB5PSIxNjIiIHdpZHRoPSIxNCIgaGVpZ2h0PSIxNCIgcng9IjQiIGZpbGw9IiNkNmM4ZmYiLz4KICAgICAgPHJlY3QgeD0iMzk3IiB5PSIxNjIiIHdpZHRoPSIxNCIgaGVpZ2h0PSIxNCIgcng9IjQiIGZpbGw9IiNkNmM4ZmYiLz4KICAgICAgPHJlY3QgeD0iMzUzIiB5PSIxODYiIHdpZHRoPSIxNCIgaGVpZ2h0PSIxNCIgcng9IjQiIGZpbGw9IiNkNmM4ZmYiLz4KICAgICAgPHJlY3QgeD0iMzc1IiB5PSIxODYiIHdpZHRoPSIxNCIgaGVpZ2h0PSIxNCIgcng9IjQiIGZpbGw9IiNkNmM4ZmYiLz4KICAgICAgPHJlY3QgeD0iMzk3IiB5PSIxODYiIHdpZHRoPSIxNCIgaGVpZ2h0PSIxNCIgcng9IjQiIGZpbGw9IiMzNGQzOTkiLz4KICAgICAgPHBhdGggZD0iTTQwMC41MDAgMTkzbDMgMyA1LTYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSIyLjUwMCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+CiAgICAgIDxyZWN0IHg9IjM1NiIgeT0iMTA0IiB3aWR0aD0iMTIiIGhlaWdodD0iMjgiIHJ4PSI2IiBmaWxsPSIjZmZmIiBzdHJva2U9IiM0YzFkOTUiIHN0cm9rZS13aWR0aD0iMyIvPgogICAgICA8cmVjdCB4PSIzOTYiIHk9IjEwNCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjI4IiByeD0iNiIgZmlsbD0iI2ZmZiIgc3Ryb2tlPSIjNGMxZDk1IiBzdHJva2Utd2lkdGg9IjMiLz4KICAgIDwvZz4KCiAgICA8IS0tIHBlbmNpbCAtLT4KICAgIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDM4MCAzMjIpIHJvdGF0ZSg0NSkiIGZpbHRlcj0idXJsKCNzaCkiPgogICAgICA8cmVjdCB4PSItMTciIHk9Ii00MCIgd2lkdGg9IjM0IiBoZWlnaHQ9IjY4IiBmaWxsPSIjZmJiZjI0Ii8+CiAgICAgIDxyZWN0IHg9IjMiIHk9Ii00MCIgd2lkdGg9IjE0IiBoZWlnaHQ9IjY4IiBmaWxsPSIjZjU5ZTBiIi8+CiAgICAgIDxyZWN0IHg9Ii0xMiIgeT0iLTQwIiB3aWR0aD0iNSIgaGVpZ2h0PSI2OCIgZmlsbD0iI2ZkZTY4YSIgb3BhY2l0eT0iLjg1Ii8+CiAgICAgIDxyZWN0IHg9Ii0xNyIgeT0iLTU0IiB3aWR0aD0iMzQiIGhlaWdodD0iMTQiIGZpbGw9InVybCgjbXQpIi8+CiAgICAgIDxwYXRoIGQ9Ik0tMTcgLTQ4SDE3TS0xNyAtNDRIMTciIHN0cm9rZT0iIzY0NzQ4YiIgc3Ryb2tlLXdpZHRoPSIxLjUwMCIvPgogICAgICA8cmVjdCB4PSItMTciIHk9Ii03MCIgd2lkdGg9IjM0IiBoZWlnaHQ9IjE4IiByeD0iOCIgZmlsbD0iI2Y0NzJiNiIvPgogICAgICA8cGF0aCBkPSJNLTE3IDI4SDE3TDAgNThaIiBmaWxsPSIjZjFkNWE4Ii8+CiAgICAgIDxwYXRoIGQ9Ik0tNiA0N0g2TDAgNThaIiBmaWxsPSIjMmUxYTVjIi8+CiAgICA8L2c+CiAgPC9nPgo8L3N2Zz4K">
+  <img class="brand" alt="Relio">
   <h1>Welcome, <span id="wn"></span></h1>
   <p class="sub">I want to help you organize your schedule.</p>
-  <div class="card"><b style="font-size:15px">What is Remindly?</b><p style="font-size:13px;line-height:1.6;color:var(--mute);margin-top:6px">Remindly is a simple app that helps you remember things. Add a reminder, choose the date and time, and tick it when you are done. The more you finish, the more badges you earn. It is made for students, teachers, and anyone who wants a clear daily plan.</p></div>
+  <div class="card"><b style="font-size:15px">What is Relio?</b><p style="font-size:13px;line-height:1.6;color:var(--mute);margin-top:6px">Relio is a simple app that helps you remember things. Add a reminder, choose the date and time, and tick it when you are done. The more you finish, the more badges you earn. It is made for students, teachers, and anyone who wants a clear daily plan.</p></div>
   <div class="card">
     <div class="ft"><i data-lucide="calendar-plus"></i><div><b>Plan</b><span>Reminders with dates, time and colors</span></div></div>
     <div class="ft"><i data-lucide="list-checks"></i><div><b>Track</b><span>See what is pending and finished</span></div></div>
@@ -278,6 +274,10 @@ select{width:100%;background:var(--card);border:1px solid var(--line);border-rad
 </div></div>
 
 <script>
+/* Logo (same artwork as before, applied to both .brand images) */
+const LOGO=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512"><defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8b5cf6"/><stop offset=".55" stop-color="#5b2fc4"/><stop offset="1" stop-color="#25095e"/></linearGradient><radialGradient id="hl" cx=".22" cy=".12" r=".85"><stop offset="0" stop-color="#fff" stop-opacity=".25"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient><linearGradient id="rg" gradientUnits="userSpaceOnUse" x1="0" y1="110" x2="0" y2="410"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#d6c8ff"/></linearGradient><linearGradient id="hd" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a78bfa"/><stop offset="1" stop-color="#6d3fd9"/></linearGradient><linearGradient id="mt" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#94a3b8"/><stop offset=".5" stop-color="#f1f5f9"/><stop offset="1" stop-color="#94a3b8"/></linearGradient><filter id="sh" x="-25%" y="-25%" width="150%" height="160%"><feDropShadow dx="0" dy="9" stdDeviation="8" flood-color="#12032e" flood-opacity=".5"/></filter></defs><rect width="512" height="512" rx="120" fill="url(#bg)"/><rect width="512" height="512" rx="120" fill="url(#hl)"/><rect x="3" y="3" width="506" height="506" rx="117" fill="none" stroke="#fff" stroke-opacity=".12" stroke-width="3"/><g transform="translate(-14 0)"><g fill="none" stroke="url(#rg)" stroke-linecap="round" stroke-linejoin="round" filter="url(#sh)"><path d="M132 124V388" stroke-width="48"/><circle cx="222" cy="194" r="66" stroke-width="42"/><path d="M212 268L284 386" stroke-width="46"/></g><path d="M222 194V164M222 194L242 206" fill="none" stroke="#fff" stroke-width="11" stroke-linecap="round"/><circle cx="222" cy="194" r="7" fill="#fff"/><g filter="url(#sh)"><rect x="334" y="118" width="96" height="100" rx="20" fill="#fff"/><path d="M334 138a20 20 0 0 1 20-20H410a20 20 0 0 1 20 20V148H334Z" fill="url(#hd)"/><rect x="353" y="162" width="14" height="14" rx="4" fill="#6d3fd9"/><rect x="375" y="162" width="14" height="14" rx="4" fill="#d6c8ff"/><rect x="397" y="162" width="14" height="14" rx="4" fill="#d6c8ff"/><rect x="353" y="186" width="14" height="14" rx="4" fill="#d6c8ff"/><rect x="375" y="186" width="14" height="14" rx="4" fill="#d6c8ff"/><rect x="397" y="186" width="14" height="14" rx="4" fill="#34d399"/><path d="M400.5 193l3 3 5-6" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><rect x="356" y="104" width="12" height="28" rx="6" fill="#fff" stroke="#4c1d95" stroke-width="3"/><rect x="396" y="104" width="12" height="28" rx="6" fill="#fff" stroke="#4c1d95" stroke-width="3"/></g><g transform="translate(380 322) rotate(45)" filter="url(#sh)"><rect x="-17" y="-40" width="34" height="68" fill="#fbbf24"/><rect x="3" y="-40" width="14" height="68" fill="#f59e0b"/><rect x="-12" y="-40" width="5" height="68" fill="#fde68a" opacity=".85"/><rect x="-17" y="-54" width="34" height="14" fill="url(#mt)"/><path d="M-17 -48H17M-17 -44H17" stroke="#64748b" stroke-width="1.5"/><rect x="-17" y="-70" width="34" height="18" rx="8" fill="#f472b6"/><path d="M-17 28H17L0 58Z" fill="#f1d5a8"/><path d="M-6 47H6L0 58Z" fill="#2e1a5c"/></g></g></svg>`;
+document.querySelectorAll('img.brand').forEach(i=>i.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(LOGO));
+
 const store={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 const $=id=>document.getElementById(id),ic=()=>{try{lucide.createIcons()}catch(e){}};
 const pad=n=>String(n).padStart(2,'0'),iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
@@ -286,8 +286,13 @@ const fmt=s=>new Date(s+'T00:00').toLocaleDateString('en',{month:'short',day:'nu
 const range=e=>e.start===e.end?fmt(e.start):fmt(e.start)+' – '+fmt(e.end);
 const ago=t=>{const m=Math.floor((Date.now()-t)/6e4);return m<1?'now':m<60?m+'m':m<1440?Math.floor(m/60)+'h':Math.floor(m/1440)+'d'};
 const COLORS=['#8b5cf6','#34d399','#fbbf24','#f472b6','#38bdf8','#fb923c'];
-let mode='in',user=null,view=new Date(),sel=iso(new Date()),color=COLORS[0],pendingSignup=null,verificationCode='';
+let mode='in',user=null,view=new Date(),sel=iso(new Date()),color=COLORS[0],pendingSignup=null;
 const OWNER_EMAIL='viajantejohnpatrick@gmail.com';
+
+/* ===== Supabase: paste your own values (Project Settings > API) ===== */
+const SUPABASE_URL='https://YOUR-PROJECT.supabase.co',SUPABASE_ANON_KEY='YOUR-ANON-PUBLIC-KEY';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+
 const DEFAULT_ROLES=[
   {id:'student',name:'Student',icon:'graduation-cap',color:'#c4b5fd',bg:'#241744'},
   {id:'teacher',name:'Teacher',icon:'book-open',color:'#7dd3fc',bg:'#10283a'},
@@ -300,7 +305,7 @@ const isOwner=()=>!!user&&user.email.toLowerCase()===OWNER_EMAIL;
 const isAdmin=()=>!!user&&(isOwner()||user.accountRole==='admin');
 function ensureUserRole(){if(store.get('roleUserAdded',false))return;const d=roleDefs();if(!d.some(r=>r.id==='user')){d.push(DEFAULT_ROLES.find(r=>r.id==='user'));store.set('roleDefinitions',d)}store.set('roleUserAdded',true)}
 function fillRoleSel(){const sel=$('roleSel'),keep=sel.value;sel.innerHTML=roleDefs().map(r=>`<option value="${esc(r.id)}">${esc(r.name)}</option>`).join('');if(keep&&roleDefs().some(r=>r.id===keep))sel.value=keep}
-function normalizeAccounts(){const all=users();let changed=false;Object.keys(all).forEach(email=>{const a=all[email],own=email.toLowerCase()===OWNER_EMAIL;if(own){if(a.accountRole!=='owner'||a.admin!==true){a.accountRole='owner';a.admin=true;changed=true}}else{if(!a.accountRole){a.accountRole='user';changed=true}if(!a.roleId){a.roleId='student';changed=true}if(a.admin!==undefined){delete a.admin;changed=true}}if(!Array.isArray(a.roleIds)){a.roleIds=(own||a.accountRole==='admin')?[]:[a.roleId||'student'];changed=true}});if(changed)store.set('users',all)}
+function normalizeAccounts(){const all=users();let changed=false;Object.keys(all).forEach(email=>{const a=all[email],own=email.toLowerCase()===OWNER_EMAIL;if(own){if(a.accountRole!=='owner'||a.admin!==true){a.accountRole='owner';a.admin=true;changed=true}}else{if(!a.accountRole){a.accountRole='user';changed=true}if(!a.roleId){a.roleId='student';changed=true}if(a.admin!==undefined){delete a.admin;changed=true}}if(!Array.isArray(a.roleIds)){a.roleIds=(own||a.accountRole==='admin')?[]:[a.roleId||'student'];changed=true}if(a.pass!==undefined){delete a.pass;changed=true}});if(changed)store.set('users',all)}
 function roleFor(a){if(!a)return null;if(a.accountRole==='owner')return {name:'Owner',icon:'crown',color:'#fcd34d',bg:'#422006'};if(a.accountRole==='admin')return {name:'Admin',icon:'shield-check',color:'#93c5fd',bg:'#172554'};return roleDefs().find(r=>r.id===a.roleId)||roleDefs()[0]||DEFAULT_ROLES[0]}
 function rolesFor(a){if(!a)return [];const out=[];if(a.accountRole==='owner')out.push({name:'Owner',icon:'crown',color:'#fcd34d',bg:'#422006'});else if(a.accountRole==='admin')out.push({name:'Admin',icon:'shield-check',color:'#93c5fd',bg:'#172554'});const defs=roleDefs(),ids=Array.isArray(a.roleIds)?a.roleIds:(a.roleId?[a.roleId]:[]);ids.forEach(id=>{const d=defs.find(r=>r.id===id);if(d)out.push(d)});if(!out.length)out.push(roleFor(a));return out}
 function badgeHTML(a){const rs=rolesFor(a);return rs.map(r=>`<span class="role-badge" style="--badge-color:${esc(r.color)};--badge-bg:${esc(r.bg)};--badge-border:${esc(r.color)};margin:7px 3px 0"><i data-lucide="${esc(r.icon)}"></i>${esc(r.name)}</span>`).join(' ')}
@@ -332,54 +337,87 @@ $('openTerms').onclick=openTerms;
 $('termsCheck').onclick=e=>{e.preventDefault();openTerms()};
 $('closeTerms').onclick=()=>$('termsSheet').classList.remove('on');
 $('agreeTerms').onclick=()=>{if(!$('modalTermsCheck').checked){$('termsErr').textContent='Please tick the agreement checkbox first.';return;}$('termsCheck').checked=true;$('termsSheet').classList.remove('on');$('err').textContent=''};
-function makeCode(){return String(Math.floor(100000+Math.random()*900000))}
-function beginVerification(){verificationCode=makeCode();$('verifyCode').value='';$('verifyErr').textContent='';$('demoCode').textContent=verificationCode;show('verify')}
-function finishSignup(){if(!pendingSignup)return;const u=users();if(pendingSignup.email.toLowerCase()===OWNER_EMAIL){pendingSignup.accountRole='owner';pendingSignup.admin=true;}u[pendingSignup.email]=pendingSignup;store.set('users',u);user=pendingSignup;addLog('signup',user);pendingSignup=null;mode='in';$('pass').value='';$('pass2').value='';$('verifyCode').value='';$('nn').value='';show('about')}
-$('go').onclick=()=>{
-  const e=$('email').value.trim().toLowerCase(),p=$('pass').value,u=users(),E=$('err');E.textContent='';E.style.color='';
+
+/* ===== Auth (Supabase) ===== */
+let pendingEmail='',resetEmail='';
+const say=(el,msg,ok)=>{el.style.color=ok?'var(--ok)':'';el.textContent=msg};
+const cleanErr=m=>/rate limit|security purposes/i.test(m)?'Too many requests. Please wait a minute and try again.':m;
+function beginVerification(){$('verifyCode').value='';$('verifyErr').textContent='';$('verifySub').textContent='Enter the 6-digit code sent to '+pendingEmail+'.';show('verify')}
+function profileFor(sbUser){
+  const e=sbUser.email.toLowerCase(),all=users(),m=sbUser.user_metadata||{};let a=all[e];
+  if(!a){const first=m.first||e.split('@')[0],sur=m.sur||'',roleId=roleDefs().some(r=>r.id===m.roleId)?m.roleId:'student';
+    a={sur,first,mid:m.mid||'',nick:(m.nick||'').slice(0,20),bio:'',name:(first+' '+sur).trim(),email:e,photo:'',accountRole:'user',roleId,roleIds:[roleId],banned:false,at:Date.now()}}
+  delete a.pass;
+  if(e===OWNER_EMAIL){a.accountRole='owner';a.admin=true}
+  all[e]=a;store.set('users',all);return a}
+function finishSignup(sbUser){user=profileFor(sbUser);addLog('signup',user);pendingEmail='';mode='in';$('pass').value='';$('pass2').value='';$('verifyCode').value='';$('nn').value='';show('about')}
+$('go').onclick=async()=>{
+  const e=$('email').value.trim().toLowerCase(),p=$('pass').value,E=$('err');E.textContent='';E.style.color='';
   if(!/^\S+@\S+\.\S+$/.test(e))return E.textContent='Enter a valid email';
   if(p.length<8)return E.textContent='Password needs at least 8 characters';
-  if(mode==='up'){
-    const sur=$('sur').value.trim(),fn=$('fn').value.trim(),mn=$('mn').value.trim();
-    if(!sur||!fn)return E.textContent='Surname and first name are required';
-    if(p!==$('pass2').value)return E.textContent='Passwords do not match';
-    if(u[e])return E.textContent='Account already exists';
-    if(!$('termsCheck').checked)return E.textContent='Please agree to the Terms and Conditions.';
-    const chosen=roleDefs().some(r=>r.id===$('roleSel').value)?$('roleSel').value:'student';pendingSignup={sur,first:fn,mid:mn,nick:$('nn').value.trim().slice(0,20),bio:'',name:fn+' '+sur,email:e,pass:p,photo:'',accountRole:e===OWNER_EMAIL?'owner':'user',roleId:chosen,roleIds:[chosen],banned:false,at:Date.now()};
-    show('loading');setTimeout(beginVerification,1100);
-  }else{
-    if(!u[e]||u[e].pass!==p)return E.textContent='Wrong email or password';
-    if(u[e].banned)return E.textContent='This account has been disabled. Please contact the owner.';
-    if(e===OWNER_EMAIL){u[e].accountRole='owner';u[e].admin=true;store.set('users',u)}
-    user=u[e];addLog('signin',user);E.textContent='';show('about');
-  }
+  try{
+    if(mode==='up'){
+      const sur=$('sur').value.trim(),fn=$('fn').value.trim(),mn=$('mn').value.trim();
+      if(!sur||!fn)return E.textContent='Surname and first name are required';
+      if(p!==$('pass2').value)return E.textContent='Passwords do not match';
+      if(!$('termsCheck').checked)return E.textContent='Please agree to the Terms and Conditions.';
+      const chosen=roleDefs().some(r=>r.id===$('roleSel').value)?$('roleSel').value:'student';
+      show('loading');
+      const {data,error}=await sb.auth.signUp({email:e,password:p,options:{data:{sur,first:fn,mid:mn,nick:$('nn').value.trim().slice(0,20),roleId:chosen}}});
+      if(error){show('auth');return say(E,cleanErr(error.message))}
+      if(data.user&&data.user.identities&&data.user.identities.length===0){show('auth');return say(E,'Account already exists')}
+      if(data.session)return finishSignup(data.user);
+      pendingEmail=e;beginVerification();
+    }else{
+      $('go').disabled=true;
+      const {data,error}=await sb.auth.signInWithPassword({email:e,password:p});
+      $('go').disabled=false;
+      if(error){
+        if(/not confirmed/i.test(error.message)){pendingEmail=e;await sb.auth.resend({type:'signup',email:e});return beginVerification()}
+        return say(E,/invalid login/i.test(error.message)?'Wrong email or password':cleanErr(error.message))}
+      const a=profileFor(data.user);
+      if(a.banned){await sb.auth.signOut();return say(E,'This account has been disabled. Please contact the owner.')}
+      user=a;addLog('signin',user);show('about');
+    }
+  }catch(x){$('go').disabled=false;show('auth');say(E,'Network error. Please try again.')}
 };
-/* Forgot password (frontend demo: code is shown on screen, no email is sent) */
-let resetEmail='',resetCode='';
+/* Forgot password */
 function openReset(){$('rEmail').value=$('email').value.trim();$('rErr').textContent='';$('rErr2').textContent='';$('r1').style.display='block';$('r2').style.display='none';$('rSub').textContent='Enter your email to get a 6-digit code.';show('reset')}
 $('fp').onclick=openReset;
-$('rBack').onclick=()=>{resetEmail='';resetCode='';setAuthMode('in');show('auth')};
-function sendResetCode(){resetCode=makeCode();$('rDemo').textContent=resetCode;$('rCode').value='';$('rPass').value='';$('rPass2').value='';$('rErr2').textContent='';$('r1').style.display='none';$('r2').style.display='block';$('rSub').textContent='Enter the code and choose a new password.'}
-$('rSend').onclick=()=>{const e=$('rEmail').value.trim().toLowerCase(),u=users(),E=$('rErr');E.textContent='';
+$('rBack').onclick=()=>{resetEmail='';setAuthMode('in');show('auth')};
+$('rSend').onclick=async()=>{const e=$('rEmail').value.trim().toLowerCase(),E=$('rErr');E.textContent='';
   if(!/^\S+@\S+\.\S+$/.test(e))return E.textContent='Enter a valid email';
-  if(!u[e])return E.textContent='No account found with this email';
-  if(u[e].banned)return E.textContent='This account has been disabled. Please contact the owner.';
-  resetEmail=e;sendResetCode()};
-$('rResend').onclick=()=>{sendResetCode();$('rErr2').style.color='var(--ok)';$('rErr2').textContent='A new demo code has been created.'};
-$('rSave').onclick=()=>{const E=$('rErr2');E.style.color='';E.textContent='';
-  if($('rCode').value.trim()!==resetCode)return E.textContent='Incorrect code. Please try again.';
-  const p=$('rPass').value;
-  if(p.length<8)return E.textContent='Password needs at least 8 characters';
-  if(p!==$('rPass2').value)return E.textContent='Passwords do not match';
-  const u=users();if(!u[resetEmail])return E.textContent='Account not found';
-  u[resetEmail].pass=p;store.set('users',u);
-  const done=resetEmail;resetEmail='';resetCode='';
-  setAuthMode('in');$('email').value=done;$('pass').value='';
-  $('err').style.color='var(--ok)';$('err').textContent='Password updated. Please sign in.';show('auth')};
-$('verifyBtn').onclick=()=>{if($('verifyCode').value.trim()!==verificationCode){$('verifyErr').textContent='Incorrect code. Please try again.';return;}finishSignup()};
-$('resendCode').onclick=()=>{verificationCode=makeCode();$('verifyCode').value='';$('demoCode').textContent=verificationCode;$('verifyErr').textContent='A new demo code has been created.'};
-$('skipVerify').onclick=()=>finishSignup();
-$('out').onclick=()=>{user=null;pendingSignup=null;$('pass').value='';$('email').value='';$('termsCheck').checked=false;setAuthMode('in');show('auth')};
+  $('rSend').disabled=true;
+  try{const {error}=await sb.auth.resetPasswordForEmail(e);$('rSend').disabled=false;
+    if(error)return say(E,cleanErr(error.message));
+    resetEmail=e;$('rCode').value='';$('rPass').value='';$('rPass2').value='';$('rErr2').textContent='';
+    $('r1').style.display='none';$('r2').style.display='block';$('rSub').textContent='Enter the code sent to '+e+' and choose a new password.'}
+  catch(x){$('rSend').disabled=false;say(E,'Network error. Please try again.')}};
+$('rResend').onclick=async()=>{const E=$('rErr2');const {error}=await sb.auth.resetPasswordForEmail(resetEmail);error?say(E,cleanErr(error.message)):say(E,'A new code has been sent.',true)};
+$('rSave').onclick=async()=>{const E=$('rErr2');say(E,'');
+  const c=$('rCode').value.trim(),p=$('rPass').value;
+  if(!c)return say(E,'Enter the code from your email.');
+  if(p.length<8)return say(E,'Password needs at least 8 characters');
+  if(p!==$('rPass2').value)return say(E,'Passwords do not match');
+  try{
+    const v=await sb.auth.verifyOtp({email:resetEmail,token:c,type:'recovery'});
+    if(v.error)return say(E,'Incorrect or expired code. Please try again.');
+    const u=await sb.auth.updateUser({password:p});
+    await sb.auth.signOut();
+    if(u.error)return say(E,cleanErr(u.error.message));
+    const done=resetEmail;resetEmail='';setAuthMode('in');$('email').value=done;$('pass').value='';
+    say($('err'),'Password updated. Please sign in.',true);show('auth');
+  }catch(x){say(E,'Network error. Please try again.')}};
+/* Email verification */
+$('verifyBtn').onclick=async()=>{const t=$('verifyCode').value.trim();
+  if(!t)return say($('verifyErr'),'Enter the code from your email.');
+  try{const {data,error}=await sb.auth.verifyOtp({email:pendingEmail,token:t,type:'signup'});
+    if(error||!data.user)return say($('verifyErr'),'Incorrect or expired code. Please try again.');
+    finishSignup(data.user)}
+  catch(x){say($('verifyErr'),'Network error. Please try again.')}};
+$('resendCode').onclick=async()=>{const {error}=await sb.auth.resend({type:'signup',email:pendingEmail});error?say($('verifyErr'),cleanErr(error.message)):say($('verifyErr'),'A new code has been sent.',true)};
+$('verifyBack').onclick=()=>{pendingEmail='';setAuthMode('in');show('auth')};
+$('out').onclick=()=>{sb.auth.signOut();user=null;pendingSignup=null;$('pass').value='';$('email').value='';$('termsCheck').checked=false;setAuthMode('in');show('auth')};
 
 /* About */
 function rAbout(){$('wn').textContent=user.nick||user.first||user.name.split(' ')[0];
